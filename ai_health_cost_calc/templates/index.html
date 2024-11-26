@@ -6,6 +6,7 @@
     <title>Document</title>
     <!-- Tailwind -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="flex flex-col min-h-screen bg-gray-100 font-sans antialised">
     
@@ -103,8 +104,8 @@
 
             <!-- Histórico de Previsões -->
 
-            <!-- Clear button -->
-            <div class="mt-8 flex justify-end">
+            <!-- Clear button aligned to left -->
+            <div class="mt-8 flex justify-start">
               <form action="clear_database" method="POST">
                   {% csrf_token %}
                   <button type="submit" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700">
@@ -112,8 +113,16 @@
                   </button>
               </form>
             </div>
-          
-            <div class="mt-8">
+
+            <!-- Toggle Button for showing/hiding history -->
+            <div class="mt-4 text-center">
+              <button id="toggleHistoryBtn" class="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                Show History
+              </button>
+            </div>
+
+            <!-- History Table (initially hidden) -->
+            <div id="historySection" class="mt-8 hidden">
               <h3 class="text-xl font-semibold mb-4">Histórico de Previsões</h3>
               <table class="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
                 <thead>
@@ -150,5 +159,22 @@
             </div>
         </div>
    </div>  
+
+   <!-- JavaScript to toggle the history section -->
+   <script>
+     const toggleButton = document.getElementById('toggleHistoryBtn');
+     const historySection = document.getElementById('historySection');
+
+     toggleButton.addEventListener('click', () => {
+       const isHidden = historySection.classList.contains('hidden');
+       if (isHidden) {
+         historySection.classList.remove('hidden');
+         toggleButton.textContent = 'Hide History';
+       } else {
+         historySection.classList.add('hidden');
+         toggleButton.textContent = 'Show History';
+       }
+     });
+   </script>
 </body>
 </html>

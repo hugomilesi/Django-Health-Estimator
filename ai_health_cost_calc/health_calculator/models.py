@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
+# NAO USAR ESTA CLASSE.
 class Prediction_db(models.Model):
     SEX_CHOICES = [('male', 'Male'), ('female', 'Female')]
     REGION_CHOICES = [

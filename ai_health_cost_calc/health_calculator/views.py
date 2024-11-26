@@ -81,6 +81,7 @@ def model_predict(request):
         smoker = request.POST['smoker']
         bmi = float(request.POST['bmi'])
 
+
         user_input = {
         "sex": sex, 
         "age": age, 
@@ -99,6 +100,7 @@ def model_predict(request):
             # Fazer a previsão com o modelo treinado
             predicted_cost = health_model.predict(processed_data)
             predicted_cost = predicted_cost[0][0]
+
         except Exception as e:
             return render(request, "index.html", {"error_message": f"Prediction error: {str(e)}"})
 
@@ -110,10 +112,13 @@ def model_predict(request):
             children=children,
             smoker=smoker,
             bmi=bmi,
-            predicted_cost=predicted_cost
+            predicted_cost=round(predicted_cost, 2),
+            user=request.user
         )
 
-        return render(request, 'index.html', {'prediction': predicted_cost})
+        # Filtra os resultados por usuário
+        predictions = Prediction.objects.filter(user=request.user)
+        return render(request, 'index.html', {'prediction': predicted_cost, "predictions":predictions})
 
 
 def user_logout(request):
@@ -123,4 +128,4 @@ def user_logout(request):
 @login_required    
 def clear_database(request):
     Prediction.objects.all().delete()  # Delete data
-    return render(request, 'index.html')
+    return redirect("/")
