@@ -102,17 +102,6 @@
             </div>
 
             <!-- Histórico de Previsões -->
-
-            <!-- Clear button -->
-            <div class="mt-8 flex justify-end">
-              <form action="clear_database" method="POST">
-                  {% csrf_token %}
-                  <button type="submit" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700">
-                      Clear History
-                  </button>
-              </form>
-            </div>
-          
             <div class="mt-8">
               <h3 class="text-xl font-semibold mb-4">Histórico de Previsões</h3>
               <table class="min-w-full bg-white border border-gray-300 rounded-md shadow-md">

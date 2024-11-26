@@ -2,13 +2,33 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+import os
 from health_calculator import models
+from .models import Prediction
+# ML model
+import joblib
+import pandas as pd
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
+
+# Model Load
+loaded_preprocessor = joblib.load('../model/preprocessor.pkl')
+health_model = joblib.load('../model/model.pkl')
+
 
 # The @login_required means only logged users can access this view
 @login_required
 def index(request):
-    return render(request, 'index.html')
+    predictions = Prediction.objects.filter(user=request.user)
+    #predictions = Prediction.objects.all()
+    return render(request, 'index.html', {'predictions':predictions})
 
 def user_signup(request):
     """
@@ -52,6 +72,55 @@ def user_login(request):
             return render(request, "login.html", {"error_message":error_message})
     return render(request, 'login.html')
 
+def model_predict(request):
+    if request.method == "POST":
+        sex = request.POST['sex']
+        age = int(request.POST["age"])
+        region = request.POST['region']
+        children = request.POST['children']
+        smoker = request.POST['smoker']
+        bmi = float(request.POST['bmi'])
+
+        user_input = {
+        "sex": sex, 
+        "age": age, 
+        "region": region, 
+        "children": children, 
+        "smoker": smoker,
+        "bmi": bmi      
+        }
+
+        new_data = pd.DataFrame([user_input])
+
+        try:
+            # Pré-processar os dados com o pré-processador salvo
+            processed_data = loaded_preprocessor.transform(new_data)    
+
+            # Fazer a previsão com o modelo treinado
+            predicted_cost = health_model.predict(processed_data)
+            predicted_cost = predicted_cost[0][0]
+        except Exception as e:
+            return render(request, "index.html", {"error_message": f"Prediction error: {str(e)}"})
+
+        # saving into the databse
+        Prediction.objects.create(
+            sex=sex,
+            age=age,
+            region=region,
+            children=children,
+            smoker=smoker,
+            bmi=bmi,
+            predicted_cost=predicted_cost
+        )
+
+        return render(request, 'index.html', {'prediction': predicted_cost})
+
+
 def user_logout(request):
     logout(request)
     return redirect('/')
+
+@login_required    
+def clear_database(request):
+    Prediction.objects.all().delete()  # Delete data
+    return render(request, 'index.html')
