@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.urls import reverse
 from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 import os
@@ -27,7 +29,12 @@ health_model = joblib.load('../model/model.pkl')
 @login_required
 def index(request):
     predictions = Prediction.objects.filter(user=request.user)
-    #predictions = Prediction.objects.all()
+    # Handle CRUD
+    if request.method == "POST":
+        if "delete" in request.POST:
+            pk = request.POST.get("delete")
+            return HttpResponse("clicked delet butn")
+
     return render(request, 'index.html', {'predictions':predictions})
 
 def user_signup(request):
@@ -99,7 +106,7 @@ def model_predict(request):
 
             # Fazer a previsão com o modelo treinado
             predicted_cost = health_model.predict(processed_data)
-            predicted_cost = predicted_cost[0][0]
+            predicted_cost = round(float(predicted_cost[0][0]), 2)
 
         except Exception as e:
             return render(request, "index.html", {"error_message": f"Prediction error: {str(e)}"})
@@ -112,7 +119,7 @@ def model_predict(request):
             children=children,
             smoker=smoker,
             bmi=bmi,
-            predicted_cost=round(predicted_cost, 2),
+            predicted_cost=predicted_cost,
             user=request.user
         )
 

@@ -25,6 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+DB_USER = os.getenv("DB_USER")
+DB_HOST = os.getenv("DB_HOST")
 DB_NAME = os.getenv("DB_NAME")
 DB_PW = os.getenv("DB_PW")
 
@@ -90,9 +92,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': DB_NAME,
-        'USER':'avnadmin',
+        'USER':DB_USER,
         'PASSWORD': DB_PW,
-        'HOST': 'postgre-db-ai-health-cost-calculator.i.aivencloud.com',
+        'HOST': DB_HOST,
         'PORT': '10694'
     }
 }
